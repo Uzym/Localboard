@@ -1,7 +1,6 @@
 from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Numeric
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 
 Base = declarative_base()
 
@@ -16,10 +15,6 @@ class User(Base):
     desc = Column(String)
     type = Column(String)
 
-    groups = relationship("Groups", back_populates="user")
-    request_log = relationship("RequestLog", back_populates="user")
-    offer = relationship("Offer", back_populates="user")
-
 
 class Groups(Base):
 
@@ -30,8 +25,7 @@ class Groups(Base):
     busy = Column(Integer)
     owner_id = Column(Integer, ForeignKey("user.user_id"))
 
-    user = relationship("User", back_populates="groups")
-    request = relationship("Request", back_populates="groups")
+    owner = relationship("User", foreign_keys=[owner_id])
 
 
 class Request(Base):
@@ -43,8 +37,8 @@ class Request(Base):
     user_id = Column(Integer, unique=True)
     group_id = Column(Integer, ForeignKey("groups.group_id"))
 
-    offer = relationship("Offer", back_populates="request")
-    groups = relationship("Groups", back_populates="request")
+    offer = relationship("Offer", foreign_keys=[offer_id])
+    offer = relationship("Groups", foreign_keys=[group_id])
 
 
 class RequestLog(Base):
@@ -57,7 +51,8 @@ class RequestLog(Base):
     info = Column(String)
     time = Column(DateTime)
 
-    user = relationship("User", back_populates="request_log")
+    provider = relationship("User", foreign_keys=[provider_id])
+    customer = relationship("User", foreign_keys=[customer_id])
 
 
 class Offer(Base):
@@ -73,9 +68,8 @@ class Offer(Base):
     hidden = Column(Integer)
     location_id = Column(Integer, ForeignKey("location.location_id"))
 
-    user = relationship("User", back_populates="offer")
-    location = relationship("Location", back_populates="offer")
-    offer_photo = relationship("OfferPhoto", back_populates="offer")
+    user = relationship("User", foreign_keys=[user_id])
+    location = relationship("Location", foreign_keys=[location_id])
 
 
 class OfferPhoto(Base):
@@ -86,7 +80,7 @@ class OfferPhoto(Base):
     offer_id = Column(Integer, ForeignKey("offer.offer_id"))
     photo_url = Column(String, unique=True)
 
-    offer = relationship("Offer", back_populates="offeer_photo")
+    offer = relationship("Offer", foreign_keys=[offer_id])
 
 
 class Location(Base):
@@ -95,5 +89,3 @@ class Location(Base):
 
     location_id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
-
-    offer = relationship("Offer", back_populates="location")

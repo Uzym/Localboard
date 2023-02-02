@@ -2,7 +2,7 @@ version: '3.0'
 
 services:
   db:
-    container_name: "db"
+    container_name: db
     image: postgres
     restart: always
     environment:
@@ -37,7 +37,7 @@ services:
       - db
     restart: always
 
-  request_handler:
-    build: request_handler/
-    ports:
-      - 1234:1234
+  # request_handler:
+  #   build: request_handler/
+  #   ports:
+  #     - 1234:1234
