@@ -11,7 +11,7 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    chat_id = Column(Integer, unique=True)
+    chat_id = Column(Integer, unique=True, index=True, nullable=False)
     desc = Column(String)
     type = Column(String)
 
@@ -21,7 +21,7 @@ class Groups(Base):
     __tablename__ = "groups"
 
     group_id = Column(Integer, primary_key=True, index=True)
-    chat_id = Column(Integer, unique=True)
+    chat_id = Column(Integer, unique=True, index=True, nullable=False)
     busy = Column(Integer)
     owner_id = Column(Integer, ForeignKey("user.user_id"))
 
@@ -34,7 +34,7 @@ class Request(Base):
 
     request_id = Column(Integer, primary_key=True, index=True)
     offer_id = Column(Integer, ForeignKey("offer.offer_id"))
-    user_id = Column(Integer, unique=True)
+    user_id = Column(Integer, unique=True, index=True, nullable=False)
     group_id = Column(Integer, ForeignKey("groups.group_id"))
 
     offer = relationship("Offer", foreign_keys=[offer_id])
@@ -46,13 +46,11 @@ class RequestLog(Base):
     __tablename__ = "request_log"
 
     request_log_id = Column(Integer, primary_key=True, index=True)
-    provider_id = Column(Integer, ForeignKey("user.user_id"))
-    customer_id = Column(Integer, ForeignKey("user.user_id"))
+    user_id = Column(Integer, ForeignKey("user.user_id"))
     info = Column(String)
     time = Column(DateTime)
 
-    provider = relationship("User", foreign_keys=[provider_id])
-    customer = relationship("User", foreign_keys=[customer_id])
+    user = relationship("User", foreign_keys=[user_id])
 
 
 class Offer(Base):

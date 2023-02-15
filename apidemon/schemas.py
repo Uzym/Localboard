@@ -22,12 +22,28 @@ class Groups(BaseModel):
         orm_mode = True
 
 
+class newOffer(BaseModel):
+
+    chat_id: int
+    title: str
+    cost: str
+    tag: str
+    desc: str
+    location_id: int
+    hidden: int
+
+    class Config:
+        orm_mode = True
+
+
 class Offer(BaseModel):
 
     title: str
     cost: str
     tag: str
     desc: str
+    user_id: int
+    location_id: int
 
     class Config:
         orm_mode = True
@@ -64,3 +80,9 @@ class Request(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Reply(BaseModel):
+
+    status: str
+    message: str
