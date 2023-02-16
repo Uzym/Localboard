@@ -1,6 +1,17 @@
 version: '3.0'
 
 services:
+  tg_bot:
+    container_name:  tg_bot
+    restart: always
+    build: ./tg_bot
+    environment:
+      - TOKEN=${TOKEN}
+      - apidemon_url=http://apidemon:8000
+    command: python3 main.py
+    networks:
+      - api_network
+
   db:
     container_name: db
     image: postgres
@@ -11,6 +22,8 @@ services:
       - POSTGRES_DB=${DB_NAME}
     ports:
       - "5433:5432"
+    networks:
+      - api_network
 
   pgadmin:
     container_name: pgadmin
@@ -22,6 +35,8 @@ services:
       - 5050:80
     depends_on:
       - db
+    networks:
+      - api_network
 
   apidemon:
     container_name: apidemon
@@ -36,8 +51,9 @@ services:
     depends_on:
       - db
     restart: always
+    networks:
+      - api_network
 
-  # request_handler:
-  #   build: request_handler/
-  #   ports:
-  #     - 1234:1234
+networks:
+  api_network:
+    driver: bridge
