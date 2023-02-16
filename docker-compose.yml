@@ -20,6 +20,8 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     networks:
@@ -53,6 +55,9 @@ services:
     restart: always
     networks:
       - api_network
+
+volumes:
+  pgdata:
 
 networks:
   api_network:
