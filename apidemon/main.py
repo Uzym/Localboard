@@ -65,17 +65,16 @@ async def get_users():
     return users
 
 
-def is_sailer(chat_id: int, response: Response):
-    try:
-        user = db.session.query(models.User).filter(models.User.chat_id==chat_id).all()
-    except Exception as e:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return {
-            "error": e
-        }
-    response.status_code = status.HTTP_200_OK
-    return {"user": user, "is_sailer": bool(len(user))}
-
+@app.get("/is_user/{id}")
+async def is_user(id: int):
+    
+    user = db.session.query(models.User).filter_by(chat_id=id).all()
+    
+    if len(user) == 0:
+        return {"ans": "not found"}
+    user_id = user[0].user_id
+    return {"ans": "ok", "user_id": user_id}
+        
 
 @app.get("/users/{id}")
 async def get_user(id: int, response: Response):
@@ -96,13 +95,14 @@ async def get_offers():
     return offers
 
 
-@app.post("/offers/{chat_id}")
-async def new_offer(offer: schemas.newOffer, response: Response):
-    try:
-        user = is_sailer(chat_id=offer.chat_id, response=response)
-        # if (user["is_sailer"]):
+#@app.get("/add_desc_offer")
+
+@app.get("/offers/{id}")
+async def new_offer(id: int):
+    user = await is_user(id)
+        # if (user["ans"] == "ok"):
         #     new_offer = models.Offer(
-        #         title=offer.title, cost=offer.cost, tag=offer.tag, 
+        #         title=offer.title, cost=offer.cost, tag=offer.tag,
         #         desc=offer.desc, user_id=user["user"]["user_id"],
         #         location_id=offer.location_id, hidden=offer.hidden)
         #     db.session.add(new_offer)
@@ -112,13 +112,7 @@ async def new_offer(offer: schemas.newOffer, response: Response):
         #     return {
         #         "error": "no sailer"
         #     }
-    except Exception as e:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return {
-            "error": e
-        }
-    response.status_code = status.HTTP_200_OK
-    return user["user"]
+    return user
 
 # всю инфу по оферу и юзеру. OfferID -> userId -> 2 таблицы
 # добавить группу chatID -> isSailer() -> userID -> таблица

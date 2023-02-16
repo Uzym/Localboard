@@ -21,21 +21,6 @@ class Groups(BaseModel):
     class Config:
         orm_mode = True
 
-
-class newOffer(BaseModel):
-
-    chat_id: int
-    title: str
-    cost: str
-    tag: str
-    desc: str
-    location_id: int
-    hidden: int
-
-    class Config:
-        orm_mode = True
-
-
 class Offer(BaseModel):
 
     title: str
