@@ -30,19 +30,24 @@ class BotConfig:
 
         self.INLINE_REQUSESTS = {
             "offer_add_desc": {
-                "text": "изменить описание"
+                "text": "изменить описание",
+                "message": "Введите описание"
             },
             "offer_add_title": {
-                "text": "изменить название"
+                "text": "изменить название",
+                "message": "Введите название"
             },
             "offer_add_cost": {
-                "text": "изменить цену"
+                "text": "изменить цену",
+                "message": "Введите цену"
             },
             "offer_publish": {
-                "text": "опубликовать"
+                "text": "опубликовать",
+                "message": "Опубликовано"
             },
             "offer_hidden": {
-                "text": "скрыть"
+                "text": "скрыть",
+                "message": "Скрыто"
             }
         }
         
@@ -60,10 +65,10 @@ class BotConfig:
             "Для поиска объявлений используйте /list_offer\n" \
             "Для создания своего объявления используйте /new_offer"
 
-    def offer_format_long(self, title, cost, desc, user_name, chat_id, type, hidden):
-        msg = f"<b>{title}<\b> - {cost}\n{desc}\n<b>{user_name}<\b>"
+    def offer_format_long(self, title="", cost="", desc="", user_name="", chat_id="", type="", hidden=0):
+        msg = f"{title} - {cost}\n{desc}\n{user_name}"
         if hidden == 1:
-            msg = msg + "\n<b>Скрыто<\b>"
+            msg = msg + "\nСкрыто"
         return msg
 
     def offer_format_short(self, title, cost):

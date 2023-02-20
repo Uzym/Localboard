@@ -12,11 +12,13 @@ app.add_middleware(DBSessionMiddleware, db_url=os.environ["DATABASE_URL"])
 
 # main
 
+
 @app.get("/")
 async def test():
     return {"1": "2"}
 
 # locations
+
 
 @app.get("/locations")
 async def get_locations(response: Response):
@@ -55,24 +57,30 @@ async def delete_location(id: int, response: Response):
 
 # user
 
+
 @app.get("/users")
 async def get_users():
     users = db.session.query(models.User).all()
     return users
 
+
 def add_user_func(user: schemas.User):
-    db_user = models.User(name="user"+str(randint(0,100000)), chat_id=user.chat_id)
+    db_user = models.User(
+        name="user"+str(randint(0, 100000)), chat_id=user.chat_id)
     db.session.add(db_user)
     db.session.commit()
     return db_user
+
 
 @app.post("/users/add")
 async def add_user(user: schemas.User):
     return add_user_func(user)
 
+
 @app.get("/users/get/{chat_id}")
 async def get_user(chat_id: str, response: Response):
     return is_user(chat_id, response)
+
 
 def is_user(chat_id: str, response: Response):
     try:
@@ -96,10 +104,12 @@ def is_user(chat_id: str, response: Response):
 
 # offers
 
+
 @app.get("/offers")
 async def get_offers():
     offers = db.session.query(models.Offer).all()
     return offers
+
 
 @app.post("/offers/add/")
 async def add_offer(offer: schemas.OfferNew):
@@ -109,10 +119,10 @@ async def add_offer(offer: schemas.OfferNew):
     if user["ans"] == 0:
         new_user = schemas.User(chat_id=offer.chat_id)
         db_user = add_user_func(new_user)
-        user_id = db_user.user_id
+        user_id = db_user.user_id   
     else:
         user_id = user["user"].user_id
-    
+
     db_offer = models.Offer(
         user_id=user_id,
         hidden=1
@@ -120,23 +130,27 @@ async def add_offer(offer: schemas.OfferNew):
     db.session.add(db_offer)
     db.session.commit()
 
-    return db_offer
+    return {"offer": db_offer, "offer_id": db_offer.offer_id}
+
 
 @app.post("/offers/add/title")
 async def add_offer_title(offer: schemas.OfferTitle):
     try:
-        db.session.query(models.Offer).filter_by(offer_id=offer.offer_id).update({'title': offer.title})
+        db.session.query(models.Offer).filter_by(
+            offer_id=offer.offer_id).update({'title': offer.title})
         db.session.commit()
         return {"ans": "ok"}
     except Exception as e:
         return {
             "error": e
         }
+
 
 @app.post("/offers/add/desc")
 async def add_offer_desc(offer: schemas.OfferDesc):
     try:
-        db.session.query(models.Offer).filter_by(offer_id=offer.offer_id).update({'desc': offer.desc})
+        db.session.query(models.Offer).filter_by(
+            offer_id=offer.offer_id).update({'desc': offer.desc})
         db.session.commit()
         return {"ans": "ok"}
     except Exception as e:
@@ -144,16 +158,19 @@ async def add_offer_desc(offer: schemas.OfferDesc):
             "error": e
         }
 
+
 @app.post("/offers/add/cost")
 async def add_offer_cost(offer: schemas.OfferCost):
     try:
-        db.session.query(models.Offer).filter_by(offer_id=offer.offer_id).update({'cost': offer.cost})
+        db.session.query(models.Offer).filter_by(
+            offer_id=offer.offer_id).update({'cost': offer.cost})
         db.session.commit()
         return {"ans": "ok"}
     except Exception as e:
         return {
             "error": e
         }
+
 
 @app.post("/offers/add/hidden")
 async def add_offer_hidden(offer: schemas.OfferHidden):
@@ -170,10 +187,12 @@ async def add_offer_hidden(offer: schemas.OfferHidden):
             "error": e
         }
 
+
 @app.get("/offers/get/{offer_id}")
 async def get_offer(offer_id: int, response: Response):
     try:
-        offer = db.session.query(models.Offer).filter_by(offer_id=offer_id).first()
+        offer = db.session.query(models.Offer).filter_by(
+            offer_id=offer_id).first()
     except Exception as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {
