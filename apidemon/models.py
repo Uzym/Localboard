@@ -11,7 +11,7 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    chat_id = Column(Integer, unique=True, index=True, nullable=False)
+    chat_id = Column(String, unique=True, nullable=False)
     desc = Column(String)
     type = Column(String)
 
@@ -59,7 +59,7 @@ class Offer(Base):
 
     offer_id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
-    cost = Column(Numeric)
+    cost = Column(String)
     tag = Column(String)
     desc = Column(String)
     user_id = Column(Integer, ForeignKey("user.user_id"))

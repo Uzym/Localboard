@@ -2,17 +2,21 @@ import os
 import models
 import schemas
 
+from random import randint
+
 from fastapi import FastAPI, Request, Response, status
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 
 app = FastAPI()
 app.add_middleware(DBSessionMiddleware, db_url=os.environ["DATABASE_URL"])
 
+# main
 
 @app.get("/")
-async def ggame():
+async def test():
     return {"1": "2"}
 
+# locations
 
 @app.get("/locations")
 async def get_locations(response: Response):
@@ -27,7 +31,7 @@ async def get_locations(response: Response):
     return locations
 
 
-@app.post("/locations")
+@app.post("/locations/add")
 async def add_location(location: schemas.Location):
     db_location = models.Location(title=location.title)
     db.session.add(db_location)
@@ -35,7 +39,7 @@ async def add_location(location: schemas.Location):
     return db_location
 
 
-@app.delete("/locations/{id}")
+@app.delete("/locations/delete/{id}")
 async def delete_location(id: int, response: Response):
     try:
         location = db.session.query(
@@ -49,76 +53,135 @@ async def delete_location(id: int, response: Response):
     response.status_code = status.HTTP_200_OK
     return location
 
-
-@app.post("/users")
-async def add_user(user: schemas.User):
-    db_user = models.User(name=user.name, chat_id=user.chat_id,
-                          desc=user.desc, type=user.type)
-    db.session.add(db_user)
-    db.session.commit()
-    return db_user
-
+# user
 
 @app.get("/users")
 async def get_users():
     users = db.session.query(models.User).all()
     return users
 
+def add_user_func(user: schemas.User):
+    db_user = models.User(name="user"+str(randint(0,100000)), chat_id=user.chat_id)
+    db.session.add(db_user)
+    db.session.commit()
+    return db_user
 
-def is_sailer(chat_id: int, response: Response):
+@app.post("/users/add")
+async def add_user(user: schemas.User):
+    return add_user_func(user)
+
+@app.get("/users/get/{chat_id}")
+async def get_user(chat_id: str, response: Response):
+    return is_user(chat_id, response)
+
+def is_user(chat_id: str, response: Response):
     try:
-        user = db.session.query(models.User).filter(models.User.chat_id==chat_id).all()
+        user = db.session.query(models.User).filter_by(chat_id=chat_id).first()
     except Exception as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {
+            "ans": 0,
             "error": e
         }
     response.status_code = status.HTTP_200_OK
-    return {"user": user, "is_sailer": bool(len(user))}
-
-
-@app.get("/users/{id}")
-async def get_user(id: int, response: Response):
-    try:
-        user = db.session.query(models.User).filter_by(user_id=id).all()
-    except Exception as e:
-        response.status_code = status.HTTP_400_BAD_REQUEST
+    if user != None:
         return {
-            "error": e
+            "ans": 1,
+            "user": user
         }
-    response.status_code = status.HTTP_200_OK
-    return user
+    else:
+        return {
+            "ans": 0
+        }
 
+# offers
 
 @app.get("/offers")
 async def get_offers():
     offers = db.session.query(models.Offer).all()
     return offers
 
+@app.post("/offers/add/")
+async def add_offer(offer: schemas.OfferNew):
 
-@app.post("/offers/{chat_id}")
-async def new_offer(offer: schemas.newOffer, response: Response):
+    user = is_user(chat_id=offer.chat_id, response=Response())
+    user_id = 0
+    if user["ans"] == 0:
+        new_user = schemas.User(chat_id=offer.chat_id)
+        db_user = add_user_func(new_user)
+        user_id = db_user.user_id
+    else:
+        user_id = user["user"].user_id
+    
+    db_offer = models.Offer(
+        user_id=user_id,
+        hidden=1
+    )
+    db.session.add(db_offer)
+    db.session.commit()
+
+    return db_offer
+
+@app.post("/offers/add/title")
+async def add_offer_title(offer: schemas.OfferTitle):
     try:
-        user = is_sailer(chat_id=offer.chat_id, response=response)
-        # if (user["is_sailer"]):
-        #     new_offer = models.Offer(
-        #         title=offer.title, cost=offer.cost, tag=offer.tag, 
-        #         desc=offer.desc, user_id=user["user"]["user_id"],
-        #         location_id=offer.location_id, hidden=offer.hidden)
-        #     db.session.add(new_offer)
-        #     db.session.commit()
-        # else:
-        #     response.status_code = status.HTTP_400_BAD_REQUEST
-        #     return {
-        #         "error": "no sailer"
-        #     }
+        db.session.query(models.Offer).filter_by(offer_id=offer.offer_id).update({'title': offer.title})
+        db.session.commit()
+        return {"ans": "ok"}
+    except Exception as e:
+        return {
+            "error": e
+        }
+
+@app.post("/offers/add/desc")
+async def add_offer_desc(offer: schemas.OfferDesc):
+    try:
+        db.session.query(models.Offer).filter_by(offer_id=offer.offer_id).update({'desc': offer.desc})
+        db.session.commit()
+        return {"ans": "ok"}
+    except Exception as e:
+        return {
+            "error": e
+        }
+
+@app.post("/offers/add/cost")
+async def add_offer_cost(offer: schemas.OfferCost):
+    try:
+        db.session.query(models.Offer).filter_by(offer_id=offer.offer_id).update({'cost': offer.cost})
+        db.session.commit()
+        return {"ans": "ok"}
+    except Exception as e:
+        return {
+            "error": e
+        }
+
+@app.post("/offers/add/hidden")
+async def add_offer_hidden(offer: schemas.OfferHidden):
+    try:
+        db.session.query(models.Offer).filter_by(
+            offer_id=offer.offer_id
+        ).update({
+            'hidden': int(offer.hidden)
+        })
+        db.session.commit()
+        return {"ans": "ok"}
+    except Exception as e:
+        return {
+            "error": e
+        }
+
+@app.get("/offers/get/{offer_id}")
+async def get_offer(offer_id: int, response: Response):
+    try:
+        offer = db.session.query(models.Offer).filter_by(offer_id=offer_id).first()
     except Exception as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {
             "error": e
         }
     response.status_code = status.HTTP_200_OK
-    return user["user"]
+    return offer
+
 
 # всю инфу по оферу и юзеру. OfferID -> userId -> 2 таблицы
 # добавить группу chatID -> isSailer() -> userID -> таблица

@@ -4,10 +4,7 @@ from datetime import datetime
 
 class User(BaseModel):
 
-    name: str
-    chat_id: int
-    desc: str
-    type: str
+    chat_id: str
 
     class Config:
         orm_mode = True
@@ -21,20 +18,51 @@ class Groups(BaseModel):
     class Config:
         orm_mode = True
 
+class OfferNew(BaseModel):
 
-class newOffer(BaseModel):
+    chat_id: str
+    class Config:
+        orm_mode = True
 
-    chat_id: int
+class OfferTitle(BaseModel):
+
+    offer_id: int
     title: str
-    cost: str
-    tag: str
-    desc: str
-    location_id: int
-    hidden: int
 
     class Config:
         orm_mode = True
 
+class OfferCost(BaseModel):
+
+    offer_id: int
+    cost: str
+
+    class Config:
+        orm_mode = True
+
+class OfferTag(BaseModel):
+
+    offer_id: int
+    tag: str
+
+    class Config:
+        orm_mode = True
+
+class OfferDesc(BaseModel):
+
+    offer_id: int
+    desc: str
+
+    class Config:
+        orm_mode = True
+
+class OfferHidden(BaseModel):
+
+    offer_id: int
+    hidden: bool
+
+    class Config:
+        orm_mode = True
 
 class Offer(BaseModel):
 
