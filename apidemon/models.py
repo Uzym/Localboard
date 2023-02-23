@@ -65,6 +65,7 @@ class Offer(Base):
     user_id = Column(Integer, ForeignKey("user.user_id"))
     hidden = Column(Integer)
     location_id = Column(Integer, ForeignKey("location.location_id"))
+    quantity = Column(Integer)
 
     user = relationship("User", foreign_keys=[user_id])
     location = relationship("Location", foreign_keys=[location_id])

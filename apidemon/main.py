@@ -104,12 +104,19 @@ def is_user(chat_id: str, response: Response):
 
 # offers
 
+@app.get("/offers/get/my/{chat_id}")
+async def get_my_offers(chat_id: str, response: Response):
+    user = is_user(chat_id=chat_id, response=response)
+    if user["ans"] == 0:
+        return {"ans": 0}
+    user_id = user["user"].user_id
+    offers = db.session.query(models.Offer).filter_by(user_id=user_id).all()
+    return {"offers": offers, "ans": 1}
 
 @app.get("/offers")
 async def get_offers():
     offers = db.session.query(models.Offer).all()
     return offers
-
 
 @app.post("/offers/add/")
 async def add_offer(offer: schemas.OfferNew):
@@ -196,10 +203,11 @@ async def get_offer(offer_id: int, response: Response):
     except Exception as e:
         response.status_code = status.HTTP_400_BAD_REQUEST
         return {
+            "ans": 0,
             "error": e
         }
     response.status_code = status.HTTP_200_OK
-    return offer
+    return {"offer": offer, "ans": 1}
 
 
 # всю инфу по оферу и юзеру. OfferID -> userId -> 2 таблицы
