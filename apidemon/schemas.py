@@ -64,6 +64,24 @@ class OfferHidden(BaseModel):
     class Config:
         orm_mode = True
 
+class OfferQuantity(BaseModel):
+
+    offer_id: int
+    quantity: int
+
+    class Config:
+        orm_mode = True
+
+class OfferList(BaseModel):
+    use_chat_id: bool
+    chat_id: str
+    use_hidden: bool
+    list_start: int
+    list_end: int
+
+    class Config:
+        orm_mode = True
+
 class Offer(BaseModel):
 
     title: str

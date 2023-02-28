@@ -16,41 +16,41 @@ class User(Base):
     type = Column(String)
 
 
-class Groups(Base):
+# class Groups(Base):
 
-    __tablename__ = "groups"
+#     __tablename__ = "groups"
 
-    group_id = Column(Integer, primary_key=True, index=True)
-    chat_id = Column(Integer, unique=True, index=True, nullable=False)
-    busy = Column(Integer)
-    owner_id = Column(Integer, ForeignKey("user.user_id"))
+#     group_id = Column(Integer, primary_key=True, index=True)
+#     chat_id = Column(Integer, unique=True, index=True, nullable=False)
+#     busy = Column(Integer)
+#     owner_id = Column(Integer, ForeignKey("user.user_id"))
 
-    owner = relationship("User", foreign_keys=[owner_id])
-
-
-class Request(Base):
-
-    __tablename__ = "request"
-
-    request_id = Column(Integer, primary_key=True, index=True)
-    offer_id = Column(Integer, ForeignKey("offer.offer_id"))
-    user_id = Column(Integer, unique=True, index=True, nullable=False)
-    group_id = Column(Integer, ForeignKey("groups.group_id"))
-
-    offer = relationship("Offer", foreign_keys=[offer_id])
-    offer = relationship("Groups", foreign_keys=[group_id])
+#     owner = relationship("User", foreign_keys=[owner_id])
 
 
-class RequestLog(Base):
+# class Request(Base):
 
-    __tablename__ = "request_log"
+#     __tablename__ = "request"
 
-    request_log_id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("user.user_id"))
-    info = Column(String)
-    time = Column(DateTime)
+#     request_id = Column(Integer, primary_key=True, index=True)
+#     offer_id = Column(Integer, ForeignKey("offer.offer_id"))
+#     user_id = Column(Integer, unique=True, index=True, nullable=False)
+#     group_id = Column(Integer, ForeignKey("groups.group_id"))
 
-    user = relationship("User", foreign_keys=[user_id])
+#     offer = relationship("Offer", foreign_keys=[offer_id])
+#     offer = relationship("Groups", foreign_keys=[group_id])
+
+
+# class RequestLog(Base):
+
+#     __tablename__ = "request_log"
+
+#     request_log_id = Column(Integer, primary_key=True, index=True)
+#     user_id = Column(Integer, ForeignKey("user.user_id"))
+#     info = Column(String)
+#     time = Column(DateTime)
+
+#     user = relationship("User", foreign_keys=[user_id])
 
 
 class Offer(Base):

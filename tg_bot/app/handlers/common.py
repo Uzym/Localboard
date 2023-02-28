@@ -1,20 +1,38 @@
-from aiogram import Dispatcher, types
-from aiogram.dispatcher import FSMContext
+from aiogram import Router, types
+from aiogram.filters import Command, Text, or_f
+from aiogram.fsm.context import FSMContext
 
-from app.config import bc
+from app.config import config
 
+router = Router()
+
+@router.message(or_f(
+        Command(commands=[config.commands.start.command]), 
+        Text(text=config.commands.start.text_eq)
+    ))
 async def start_handler(message: types.Message, state: FSMContext):
-    await state.finish()
-    await message.reply(bc.COMMANDS['start']['message'])
+    await state.clear()
+    await message.answer(
+        config.commands.start.message,
+        reply_markup=config.consume_buttons()
+    )
 
+@router.message(or_f(
+        Command(commands=[config.commands.cancel.command]), 
+        Text(text=config.commands.cancel.text_eq)
+    ))
 async def cancel_handler(message: types.Message, state: FSMContext):
-    await state.finish()
-    await message.reply(bc.COMMANDS['cancel']['message'])
+    await state.clear()
+    await message.answer(
+        config.commands.cancel.message
+    )
 
-async def help_handler(message: types.Message, state: FSMContext):
-    await message.reply(bc.COMMANDS['help']['message'], parse_mode="HTML")
+@router.message(or_f(
+        Command(commands=[config.commands.help.command]), 
+        Text(text=config.commands.help.text_eq)
+    ))
+async def help_handler(message: types.Message):
+    await message.answer(
+        config.commands.help.message
+    )
 
-def register_handlers_common(dp: Dispatcher):
-    dp.register_message_handler(start_handler, commands="start", state='*')
-    dp.register_message_handler(help_handler, commands="help", state='*')
-    dp.register_message_handler(cancel_handler, commands="cancel", state='*')

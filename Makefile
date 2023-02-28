@@ -5,7 +5,7 @@ down:
 	docker-compose down
 
 migration:
-	docker-compose run apidemon alembic revision --autogenerate -m "migration"
+	docker-compose run apidemon alembic revision --autogenerate -m "migration db"
 
 container-stop:
 	bash $(docker stop $(docker ps -a -q))

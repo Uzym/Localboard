@@ -1,38 +1,31 @@
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.types import BotCommand
-import os
+from aiogram.fsm.strategy import FSMStrategy
+from aiogram.fsm.storage.memory import MemoryStorage
 import logging
-from aiogram.utils import executor
+import asyncio
 
-from app.config import bc
-from app.handlers.common import register_handlers_common
-from app.handlers.manage_offer import register_handlers_manage_offers
+from app.handlers import common, consume, manage
 
 logger = logging.getLogger(__name__)
 
-async def on_startup(dp: Dispatcher):
-    logger.info("Starting bot")
-    commands = [
-        BotCommand(command="/"+com, description=inf["desc"]) for com, inf in bc.COMMANDS.items()
-    ]
-    await dp.bot.set_my_commands(commands)
-    logger.info("Set bot commands")
+async def main() -> None:
 
-if __name__ == '__main__':
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
+    logger.info("Starting bot")
 
-    bot = Bot(token=os.environ.get("TOKEN"), parse_mode=types.ParseMode.HTML)
-    dp = Dispatcher(bot, storage=MemoryStorage())
+    dp = Dispatcher(storage=MemoryStorage(), fsm_strategy=FSMStrategy.CHAT)
+    bot = Bot("5914064878:AAGLPDKK2SHeoAIwt08LJH_33p66UoI3KgE")
+
+    dp.include_router(manage.router)
+    dp.include_router(common.router)
+    dp.include_router(consume.router)
+
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
     
-    dp.setup_middleware(LoggingMiddleware(logger=logger))
-
-    register_handlers_common(dp)
-    register_handlers_manage_offers(dp)
-
-    executor.start_polling(dispatcher=dp, skip_updates=True, on_startup=on_startup)
-

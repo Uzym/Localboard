@@ -1,8 +1,8 @@
-"""migration
+"""migration db
 
-Revision ID: b694279c7096
+Revision ID: 3c9f359eb364
 Revises: 
-Create Date: 2023-02-06 20:24:50.396203
+Create Date: 2023-02-25 10:03:32.616991
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b694279c7096'
+revision = '3c9f359eb364'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,12 +27,12 @@ def upgrade():
     op.create_table('user',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=True),
-    sa.Column('chat_id', sa.Integer(), nullable=False),
+    sa.Column('chat_id', sa.String(), nullable=False),
     sa.Column('desc', sa.String(), nullable=True),
     sa.Column('type', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('user_id')
+    sa.PrimaryKeyConstraint('user_id'),
+    sa.UniqueConstraint('chat_id')
     )
-    op.create_index(op.f('ix_user_chat_id'), 'user', ['chat_id'], unique=True)
     op.create_index(op.f('ix_user_user_id'), 'user', ['user_id'], unique=False)
     op.create_table('groups',
     sa.Column('group_id', sa.Integer(), nullable=False),
@@ -47,12 +47,13 @@ def upgrade():
     op.create_table('offer',
     sa.Column('offer_id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=True),
-    sa.Column('cost', sa.Numeric(), nullable=True),
+    sa.Column('cost', sa.String(), nullable=True),
     sa.Column('tag', sa.String(), nullable=True),
     sa.Column('desc', sa.String(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('hidden', sa.Integer(), nullable=True),
     sa.Column('location_id', sa.Integer(), nullable=True),
+    sa.Column('quantity', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['location_id'], ['location.location_id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.user_id'], ),
     sa.PrimaryKeyConstraint('offer_id')
@@ -105,7 +106,6 @@ def downgrade():
     op.drop_index(op.f('ix_groups_chat_id'), table_name='groups')
     op.drop_table('groups')
     op.drop_index(op.f('ix_user_user_id'), table_name='user')
-    op.drop_index(op.f('ix_user_chat_id'), table_name='user')
     op.drop_table('user')
     op.drop_index(op.f('ix_location_location_id'), table_name='location')
     op.drop_table('location')
