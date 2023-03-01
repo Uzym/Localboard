@@ -88,6 +88,13 @@ class RequestHandler():
                 return {"ans": 1}
             else:
                 return {"ans": 0}
+    async def add_can_add_in_group_offer(self, offer_id, data):
+        data = {'offer_id': offer_id, 'can_add_in_group': data}
+        async with self.session.post(self.url + "/offers/add/can_add_in_group/", json=data) as res:
+            if res.status == 200:
+                return {"ans": 1}
+            else:
+                return {"ans": 0}
     async def publish_offer(self, offer_id):
         data = {'offer_id': offer_id, 'hidden': False}
         async with self.session.post(self.url + "/offers/add/hidden/", json=data) as res:

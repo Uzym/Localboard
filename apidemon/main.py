@@ -10,51 +10,6 @@ from fastapi_sqlalchemy import DBSessionMiddleware, db
 app = FastAPI()
 app.add_middleware(DBSessionMiddleware, db_url=os.environ["DATABASE_URL"])
 
-# main
-
-
-@app.get("/")
-async def test():
-    return {"1": "2"}
-
-# locations
-
-
-@app.get("/locations")
-async def get_locations(response: Response):
-    try:
-        locations = db.session.query(models.Location).first()
-    except Exception as e:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return {
-            "error": e
-        }
-    response.status_code = status.HTTP_200_OK
-    return locations
-
-
-@app.post("/locations/add")
-async def add_location(location: schemas.Location):
-    db_location = models.Location(title=location.title)
-    db.session.add(db_location)
-    db.session.commit()
-    return db_location
-
-
-@app.delete("/locations/delete/{id}")
-async def delete_location(id: int, response: Response):
-    try:
-        location = db.session.query(
-            models.Location).filter_by(location_id=id).delete()
-        db.session.commit()
-    except Exception as e:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return {
-            "error": e
-        }
-    response.status_code = status.HTTP_200_OK
-    return location
-
 # user
 
 
@@ -71,6 +26,7 @@ def add_user_func(user: schemas.User):
     db.session.commit()
     return db_user
 
+
 @app.get("/users/get/chat_id/{user_id}")
 async def get_user_chat_id(user_id: int):
     try:
@@ -78,6 +34,7 @@ async def get_user_chat_id(user_id: int):
         return {"ans": 1, "chat_id": user.chat_id}
     except:
         return {"ans": 0}
+
 
 @app.post("/users/add")
 async def add_user(user: schemas.User):
@@ -269,7 +226,7 @@ async def add_offer_hidden(offer: schemas.OfferHidden):
 
 
 @app.post("/offers/add/quantity")
-async def add_offer_hidden(offer: schemas.OfferQuantity):
+async def add_offer_quantity(offer: schemas.OfferQuantity):
     try:
         db.session.query(models.Offer).filter_by(
             offer_id=offer.offer_id
@@ -283,6 +240,20 @@ async def add_offer_hidden(offer: schemas.OfferQuantity):
             "error": e
         }
 
+@app.post("/offers/add/can_add_in_group")
+async def add_offer_can_add_in_group(offer: schemas.OfferCanGroup):
+    try:
+        db.session.query(models.Offer).filter_by(
+            offer_id=offer.offer_id
+        ).update({
+            'can_add_in_group': int(offer.can_add_in_group)
+        })
+        db.session.commit()
+        return {"ans": "ok"}
+    except Exception as e:
+        return {
+            "error": e
+        }
 
 @app.get("/offers/get/{offer_id}")
 async def get_offer(offer_id: int, response: Response):

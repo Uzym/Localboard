@@ -201,7 +201,7 @@ async def offer_title_handler(message: types.Message, state: FSMContext):
     await state.clear()
 
 
-@router.message(and_f(F.text, OfferManageForm.wait_cost))
+@router.message(and_f(F.text.regexp("\d+"), OfferManageForm.wait_cost))
 async def offer_cost_handler(message: types.Message, state: FSMContext):
     data = await state.get_data()
     res = await config.loop.create_task(rh.add_cost_offer(offer_id=data["offer_id"], data=message.text))

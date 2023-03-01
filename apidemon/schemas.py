@@ -10,15 +10,6 @@ class User(BaseModel):
     class Config:
         orm_mode = True
 
-
-class Groups(BaseModel):
-
-    chat_id: int
-    busy: int
-
-    class Config:
-        orm_mode = True
-
 class OfferNew(BaseModel):
 
     chat_id: str
@@ -36,15 +27,7 @@ class OfferTitle(BaseModel):
 class OfferCost(BaseModel):
 
     offer_id: int
-    cost: str
-
-    class Config:
-        orm_mode = True
-
-class OfferTag(BaseModel):
-
-    offer_id: int
-    tag: str
+    cost: int
 
     class Config:
         orm_mode = True
@@ -72,6 +55,12 @@ class OfferQuantity(BaseModel):
 
     class Config:
         orm_mode = True
+
+class OfferCanGroup(BaseModel):
+
+    offer_id: int
+    can_add_in_group: bool
+    
 
 class OfferList(BaseModel):
     use_chat_id: bool
@@ -103,34 +92,3 @@ class OfferPhoto(BaseModel):
 
     class Config:
         orm_mode = True
-
-
-class Location(BaseModel):
-
-    title: str
-
-    class Config:
-        orm_mode = True
-
-
-class RequestLog(BaseModel):
-
-    info: str
-    time: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class Request(BaseModel):
-
-    user_id: int
-
-    class Config:
-        orm_mode = True
-
-
-class Reply(BaseModel):
-
-    status: str
-    message: str

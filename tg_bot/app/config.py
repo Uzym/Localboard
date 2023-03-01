@@ -42,16 +42,23 @@ class Config:
         class collect_order:
             admin_command = False
             command = "collect_order"
-            text_eq = "Собрать букет самому"
-            desc = "собрать букет"
-            message = "Нажмите на кнопку товара чтобы получить более подробную информацию по нему и добавить в заказ"
+            text_eq = "Создать новый заказ"
+            desc = "создать новый заказ"
+            message = "Выберите товары, а когда захотите закончить выбор используйте команду /finish_order или просто напишите Закончить выбор"
+
+        class finish_order:
+            admin_command = False
+            command = "finish_order"
+            text_eq = "Закончить выбор" 
+            desc = "закончить выбор заказа" #
+            message = "Выберите товары, а когда захотите закончить выбор используйте команду /finish_order или просто напишите Закончить выбор"
 
         class list_offers:
             admin_command = False
             command = "list_offers"
-            text_eq = "Купить готовый букет"
-            desc = "вывести список доступных букетов"
-            message = "Просто нажмите на заинтересовавший вас товар для получения более подробной информации"
+            text_eq = "Открыть список товаров"
+            desc = "открыть список"
+            message = "Нажмите на кнопку товара чтобы получить более подробную информацию по нему и добавить в заказ"
 
         class new_offer:
             admin_command = True
@@ -72,15 +79,12 @@ class Config:
         builder.button(text=self.commands.start.text_eq)
         builder.button(text=self.commands.help.text_eq)
         builder.button(text=self.commands.cancel.text_eq)
-        builder.button(text=self.commands.list_offers.text_eq)
+        # builder.button(text=self.commands.list_offers.text_eq)
+        builder.button(text=self.commands.collect_order.text_eq)
         builder.adjust(3, 1)
         return builder.as_markup(resize_keyboard=True)
 
     class callback:
-        class offer_consume:
-            cb_data = "offer_consume"
-            text = "Приобрести"
-            message = "Скоро продавец свяжется с вами"
         
         class offer_decr:
             cb_data = "offer_decr"
@@ -142,6 +146,20 @@ class Config:
             cb_data = "offer_list"
             text = "<-"
             good_message = "Предыдущая страница"
+        
+        class order_add:
+            cb_data = "order_add"
+            text = "{} {} единиц товара"
+            good_message = "Добавленно"
+
+        class order_consume:
+            cb_data = "order_consume"
+            text = "Приобрести"
+            message = "Скоро продавец свяжется с вами"      
+
+        class offer_open_incr:
+            cb_data = "offer_open_incr"
+            message = "+{}"    
 
     def offer_message_text(self, long: bool, title: str, cost = None, desc = None, hidden = None, quantity = None) -> str:
         msg = ""
@@ -249,37 +267,82 @@ class Config:
         
         return builder.as_markup()
     
-    def offer_consume_markup(self, offer_id: int, user_id: int, cb) -> InlineKeyboardMarkup:
+    # def offer_consume_markup(self, offer_id: int, user_id: int, cb) -> InlineKeyboardMarkup:
+    #     builder = InlineKeyboardBuilder()
+    #     builder.button(
+    #         text=self.callback.offer_consume.text,
+    #         callback_data=cb(
+    #             action=self.callback.order_next.cb_data, 
+    #             value=offer_id,
+    #             extra_value=user_id
+    #         ).pack()
+    #     )
+    #     return builder.as_markup()
+    
+    # def offer_consume_message_text(self, offer):
+    #     text = "Отклик на объявление\n"
+    #     text += self.offer_message_text(
+    #         long=True,
+    #         title=offer["title"],
+    #         cost=offer["cost"],
+    #         desc=offer["desc"],
+    #         hidden=offer["hidden"],
+    #         quantity=offer["quantity"]
+    #     )
+    #     return text
+    
+    # def offer_consume_message_markup(self, user_id: str) -> InlineKeyboardMarkup:
+    #     builder = InlineKeyboardBuilder()
+    #     builder.button(
+    #         text="Покупатель",
+    #         url=f"tg://user?id={user_id}"
+    #     )
+    #     return builder.as_markup()
+    
+    def offer_consume_markup(self, cb, offer_id, num: int) -> InlineKeyboardMarkup:
         builder = InlineKeyboardBuilder()
         builder.button(
-            text=self.callback.offer_consume.text,
-            callback_data=cb(
-                action=self.callback.offer_consume.cb_data, 
-                value=offer_id,
-                extra_value=user_id
-            ).pack()
+            text="-1",
+            callback_data=cb(action=self.callback.offer_open_incr.cb_data, value=offer_id, extra_value=num-1).pack()
         )
+        builder.button(
+            text="0",
+            callback_data=cb(action=self.callback.offer_open_incr.cb_data, value=offer_id, extra_value=0).pack()
+        )
+        builder.button(
+            text="+1",
+            callback_data=cb(action=self.callback.offer_open_incr.cb_data, value=offer_id, extra_value=num+1).pack()
+        )
+        if num >= 0:
+            builder.button(
+                text=self.callback.order_add.text.format("Добавить к заказу", num),
+                callback_data=cb(action=self.callback.order_add.cb_data, value=offer_id, extra_value=num).pack()
+            )
+        else:
+            builder.button(
+                text=self.callback.order_add.text.format("Убрать из заказа", abs(num)),
+                callback_data=cb(action=self.callback.order_add.cb_data, value=offer_id, extra_value=num).pack()
+            )
+        builder.adjust(3, 1)
         return builder.as_markup()
     
-    def offer_consume_message_text(self, offer):
-        text = "Отклик на объявление\n"
-        text += self.offer_message_text(
-            long=True,
-            title=offer["title"],
-            cost=offer["cost"],
-            desc=offer["desc"],
-            hidden=offer["hidden"],
-            quantity=offer["quantity"]
-        )
+    def collect_order_text(self, titles, nums, costs) -> str:
+        text = "Заказ:\n"
+        price = 0
+        for idx, title in enumerate(titles):
+            cost = int(costs[idx])*int(nums[idx])
+            price += cost
+            text += f"{idx + 1}) {title}, {nums[idx]} штук. Стоимость {costs[idx]} * {nums[idx]} = {cost} руб.\n"
+        text += f"Итого: {price} руб."
         return text
     
-    def offer_consume_message_markup(self, user_id: str) -> InlineKeyboardMarkup:
-        builder = InlineKeyboardBuilder()
-        builder.button(
-            text="Покупатель",
-            url=f"tg://user?id={user_id}"
-        )
-        return builder.as_markup()
-    
+    def collect_order_manage(self) -> ReplyKeyboardMarkup:
+        builder = ReplyKeyboardBuilder()
+        builder.button(text=self.commands.list_offers.text_eq)
+        builder.button(text=self.commands.finish_order.text_eq)
+        builder.button(text=self.commands.collect_order.text_eq)
+        builder.button(text=self.commands.cancel.text_eq)
+        builder.adjust(2, 2)
+        return builder.as_markup(resize_keyboard=True)
 
 config = Config()
