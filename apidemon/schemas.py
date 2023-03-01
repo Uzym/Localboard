@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from fastapi import UploadFile
 
 
 class User(BaseModel):
@@ -97,7 +98,8 @@ class Offer(BaseModel):
 
 class OfferPhoto(BaseModel):
 
-    photo_url: str
+    offer_id: int
+    photo: str
 
     class Config:
         orm_mode = True

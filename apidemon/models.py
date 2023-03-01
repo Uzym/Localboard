@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Numeric
+from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Numeric, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -66,6 +66,7 @@ class Offer(Base):
     hidden = Column(Integer)
     location_id = Column(Integer, ForeignKey("location.location_id"))
     quantity = Column(Integer)
+    can_add_in_group = Column(Boolean)
 
     user = relationship("User", foreign_keys=[user_id])
     location = relationship("Location", foreign_keys=[location_id])
@@ -77,7 +78,7 @@ class OfferPhoto(Base):
 
     offer_photo_id = Column(Integer, primary_key=True, index=True)
     offer_id = Column(Integer, ForeignKey("offer.offer_id"))
-    photo_url = Column(String, unique=True)
+    photo = Column(String)
 
     offer = relationship("Offer", foreign_keys=[offer_id])
 

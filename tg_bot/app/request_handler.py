@@ -2,12 +2,22 @@ import aiohttp
 import json
 import os
 
+from app.config import config
+
 
 class RequestHandler():
     def __init__(self, url):
         self.url = url
-        self.session = aiohttp.ClientSession()
+        self.session = aiohttp.ClientSession(loop=config.loop)
 
+    async def get_user_chat_id(self, user_id: int):
+        async with self.session.get(self.url + "/users/get/chat_id/" + str(user_id)) as res:
+            result = await res.json()
+            if res.status == 200:
+                return result
+            else:
+                return {"ans": 0}
+    
     async def get_list_offers(self, chat_id: str, use_chat_id: bool, use_hidden: bool, list_start: int, list_end: int):
         data = {
             "use_chat_id": use_chat_id,
@@ -100,5 +110,14 @@ class RequestHandler():
                 return result
             else:
                 return {"ans": 0}
+
+    async def upload_photo(self, offer_id, file):
+        data = {'photo': file, "offer_id": offer_id}
+        async with self.session.post(self.url + "/offers/photo/add/", json=data) as res:
+            if res.status == 200:
+                return {"ans": 1}
+            else:
+                return {"ans": 0}
+        
 
 rh = RequestHandler(os.environ.get("apidemon_url"))

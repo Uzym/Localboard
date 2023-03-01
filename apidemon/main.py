@@ -4,7 +4,7 @@ import schemas
 
 from random import randint
 
-from fastapi import FastAPI, Request, Response, status
+from fastapi import FastAPI, Request, Response, status, UploadFile, File
 from fastapi_sqlalchemy import DBSessionMiddleware, db
 
 app = FastAPI()
@@ -71,6 +71,13 @@ def add_user_func(user: schemas.User):
     db.session.commit()
     return db_user
 
+@app.get("/users/get/chat_id/{user_id}")
+async def get_user_chat_id(user_id: int):
+    try:
+        user = db.session.query(models.User).filter_by(user_id=user_id).first()
+        return {"ans": 1, "chat_id": user.chat_id}
+    except:
+        return {"ans": 0}
 
 @app.post("/users/add")
 async def add_user(user: schemas.User):
