@@ -1,0 +1,55 @@
+version: '3.0'
+
+services:
+  tg_bot:
+    container_name:  tg_bot
+    restart: always
+    build: ./tg_bot
+    environment:
+      - TOKEN=${TOKEN}
+      - BUCKET_NAME=${BUCKET_NAME}
+      - ACCESS_KEY=${ACCESS_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - S3_URL=${S3_URL}
+      - apidemon_url=${APIDEMON_URL}
+    command: python3 main.py
+    networks:
+      - api_network
+
+  db:
+    container_name: db
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - api_network
+
+  apidemon:
+    container_name: apidemon
+    build: ./apidemon
+    command: bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - ./apidemon:/app
+    ports:
+      - 8000:8000
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - api_network
+
+volumes:
+  pgdata:
+
+networks:
+  api_network:
+    driver: bridge
