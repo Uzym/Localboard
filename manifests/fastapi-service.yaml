@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-server-service
+  labels:
+    service: fastapi-server-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-port
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
+  selector:
+    app: fastapi-localboard

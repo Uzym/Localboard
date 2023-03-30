@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-server
+  labels:
+    name: fastapi-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-localboard
+  template:
+    metadata:
+      labels:
+        app: fastapi-localboard
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: fastapi-localboard
+          image: apidemon/localboardapi:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: fastapi-server-credentials
+                  key: database_url
